@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity  {
         svMain = findViewById(R.id.svMain);
         urlsrc = "https://time.is/";
 
-
         svMain.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
             public boolean onQueryTextChange(String s) {
@@ -53,27 +52,5 @@ public class MainActivity extends AppCompatActivity  {
                 return false;
             }
         });
-/*        Elements text = doc.select("div");
-        String desc = text.text();
-        tvMain.setText(desc);*/
-       /* Call call = Helper.getClientGetReq(url);
-
-        call.enqueue(new Callback() {
-
-            @Override
-
-            public void onFailure(Call call, IOException e) {
-                Log.d("FAIL_RESPONSE", e.toString());
-                call.cancel();
-            }
-
-            @Override
-
-            public void onResponse(Call call, Response response) throws IOException {
-                resStr = response.body().string();
-                Gson gson = new Gson();
-
-            }
-        });*/
     }
 }
