@@ -1,19 +1,12 @@
 package com.example.host.atomicclock;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
-
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
-import java.io.IOException;
-
 import okhttp3.Call;
-import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -36,7 +29,6 @@ class Helper {
         return new RetrieveFeedTask();
     }
     public class RetrieveFeedTask extends AsyncTask<Object,Document, Document> {
-
         private Exception exception;
         private Activity context;
         private Document doc;
@@ -52,7 +44,6 @@ class Helper {
                 this.exception = e;
                 return null;
             }
-
         }
 
         @Override
@@ -65,11 +56,7 @@ class Helper {
         protected void onPostExecute(Document feed) {
 
         }
-
-
     }
 
-    void updateUI(){
 
-    }
 }

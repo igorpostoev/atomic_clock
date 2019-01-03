@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_main);
         tvMain = findViewById(R.id.tvMain);
         svMain = findViewById(R.id.svMain);
-        urlsrc = "https://time.is/";
+        urlsrc = getResources().getString(R.string.url);
 
-        svMain.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
+        svMain.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String s) {
                 return false;
