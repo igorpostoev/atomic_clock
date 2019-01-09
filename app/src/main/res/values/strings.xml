@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Atomic Clock</string>
-    <string name="url">https://time.is</string>
+    <string name="url">https://time.is/</string>
 </resources>

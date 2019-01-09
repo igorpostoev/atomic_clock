@@ -25,6 +25,8 @@ class Helper {
       return helper.getRetFeedTaskInternal();
     }
 
+    //TODO: адаптированть так, чтобы данные возвращались в главный поток в качестве переменной. возможно опредедление глобальной переменной в хелпере
+
     private RetrieveFeedTask getRetFeedTaskInternal(){
         return new RetrieveFeedTask();
     }
@@ -32,10 +34,15 @@ class Helper {
         private Exception exception;
         private Activity context;
         private Document doc;
+        private String city;
+
         protected Document doInBackground(Object... objs) {
-            String url = (String) objs[0];
+            String url;
             context = (Activity) objs[1];
-            Connection con = Jsoup.connect(url);
+            city = (String)objs[0];
+            url = context.getResources().getString(R.string.url);
+
+            Connection con = Jsoup.connect(url+city);
             try {
                 doc = con.get();
                 publishProgress(doc);
@@ -49,8 +56,10 @@ class Helper {
         @Override
         protected void onProgressUpdate(Document... doc) {
             super.onProgressUpdate();
-            TextView tv = context.findViewById(R.id.tvMain);
-            tv.setText(doc[0].select("div#twd").text());
+            TextView tvC = context.findViewById(R.id.tvMainCity);
+            TextView tvT = context.findViewById(R.id.tvMainTime);
+            tvT.setText(doc[0].select("div#twd").text());
+            tvC.setText(city);
         }
 
         protected void onPostExecute(Document feed) {

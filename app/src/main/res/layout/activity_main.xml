@@ -13,13 +13,47 @@
         android:layout_height="50dp"
         android:iconifiedByDefault="false"
         />
+
     <TextView
-        android:id="@+id/tvMain"
+        android:id="@+id/tvMainCity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="City"
+        style="@style/mainTextCity"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_weight="0.2"
          />
+    <TextView
+        android:id="@+id/tvMainTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time"
+        style="@style/mainTextTime"
+        android:gravity="center_vertical"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        />
+<RelativeLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:gravity="bottom"
+    android:layout_weight="1">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="106dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_autorenew"
+        app:fabSize="normal" />
+</RelativeLayout>
 
 </LinearLayout>
