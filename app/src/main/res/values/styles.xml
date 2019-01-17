@@ -13,11 +13,23 @@
     </style>
 
     <style name="mainTextCity" parent="mainText">
-
         <item name = "android:textSize">20sp</item>
     </style>
 
     <style name="mainTextTime" parent="mainText">
         <item name = "android:textSize">30sp</item>
     </style>
+
+    <style name="subText">
+        <item name = "android:textColor">@color/secondaryText</item>
+    </style>
+
+    <style name="subTextCity" parent="subText">
+        <item name = "android:textSize">20sp</item>
+    </style>
+
+    <style name="subTextTime" parent="subText">
+        <item name = "android:textSize">30sp</item>
+    </style>
+
 </resources>

@@ -18,7 +18,7 @@
         android:id="@+id/tvMainCity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="City"
+        android:text="@string/startLabel"
         style="@style/mainTextCity"
         android:layout_gravity="center"
         android:gravity="center"
@@ -28,12 +28,22 @@
         android:id="@+id/tvMainTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time"
         style="@style/mainTextTime"
         android:gravity="center_vertical"
         android:layout_gravity="center"
         android:layout_weight="1"
         />
+
+    <ImageButton
+        android:id="@+id/btnToFav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:src="@drawable/baseline_add_black_18dp"
+        android:contentDescription="@string/descAddBtn"
+        android:background="@color/text_icons"
+        android:layout_margin="16dp"/>
+
 <RelativeLayout
     android:orientation="vertical"
     android:layout_width="match_parent"
