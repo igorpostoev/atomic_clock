@@ -1,17 +1,13 @@
 package com.example.host.atomicclock;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,20 +15,16 @@ import java.util.regex.Pattern;
 
 
 class Helper {
-    static String curCity;
+
     private final static ArrayList<City> citiesGeneral = new ArrayList<>();
     private final RetrieveFeedTask retFeedTask = new RetrieveFeedTask();
+    private final static Helper helper = new Helper();
 
     static RetrieveFeedTask getRetFeedTask(){
-      Helper helper = new Helper();
-
-      return helper.getFeedTask();
+        return helper.getFeedTask();
     }
 
     private RetrieveFeedTask getFeedTask(){
-        synchronized (this){
-
-        }
         return retFeedTask;
     }
 
@@ -40,7 +32,6 @@ class Helper {
         private Document doc;
         private String city;
         private ArrayList<?> citiesToCompare;
-
 
         final protected Object doInBackground(Object... objs) {
             String url;
@@ -60,16 +51,15 @@ class Helper {
                 return null;
             }
         }
-
-
     }
 
     static String getCityFromDoc(Document doc){
         Matcher match;
         Pattern patt;
-        String str = doc.select("div#msgdiv").text();
+        String str;
         String city;
 
+        str = doc.select("div#msgdiv").text();
         patt = Pattern.compile("^.+,");
         match = patt.matcher(str);
         city = match.find() ? match.group() : "Regexp no matches";
@@ -96,29 +86,21 @@ class Helper {
 
 
     static ArrayList<City> getCities(ArrayList<String> listStr, Activity context){
-        Helper helper = new Helper();
 
         return helper.getAndUpdateCitiesGeneral(listStr, context);
     }
 
-   /* private FutureTask<ArrayList<City>>  execFutureTaskSub(ArrayList<String> listStr, Activity context){
-        FutureTask<ArrayList<City>> future =  new FutureTask<>( new RunFeedTask(listStr, context));
-        Thread t = new Thread(future);
-
-        t.start();
-
-        return  future;
-    }*/
 
     private ArrayList<City> getAndUpdateCitiesGeneral(List<String> cities, Activity context){
         citiesGeneral.clear();
         ArrayList<Thread> threads = new ArrayList<>();
+
         synchronized (citiesGeneral){
             for(String c : cities) {
                 RunFeedTask runFeedTask = new RunFeedTask(c, context);
-                Thread t = new Thread(runFeedTask,String.format("Thread of %s city", c));
-                threads.add(t);
+                Thread t = new Thread(runFeedTask, String.format("Thread of %s city", c));
                 t.setDaemon(true);
+                threads.add(t);
                 t.start();
             }
         }
@@ -128,6 +110,18 @@ class Helper {
                 t.join();
             } catch (InterruptedException e){
                 e.printStackTrace();
+            }
+        }
+
+        for(int i = 0; i < citiesGeneral.size(); i++ ){
+            if(!citiesGeneral.get(i).name.equals(cities.get(i))){
+                for(int k = i+1; k < citiesGeneral.size(); k++ ) {
+                    if (citiesGeneral.get(k).name.equals(cities.get(i))) {
+                        City c = citiesGeneral.get(i);
+                        citiesGeneral.set(i, citiesGeneral.get(k));
+                        citiesGeneral.set(k, c);
+                    }
+                }
             }
         }
 
@@ -154,11 +148,10 @@ class Helper {
                 } catch (Exception e){
                     e.printStackTrace();
                 }
+
             synchronized (citiesGeneral){
                 citiesGeneral.add(new City(city, doc.select("div#twd").text()));
             }
-
         }
     }
-
 }

@@ -2,13 +2,11 @@ package com.example.host.atomicclock;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +19,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.example.host.atomicclock.Helper.getCities;
+import static com.example.host.atomicclock.Helper.getCityFromDoc;
+import static com.example.host.atomicclock.Helper.getRetFeedTask;
+import static com.example.host.atomicclock.Helper.updateMainUI;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -47,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RecyclerView.ItemDecoration itemDecoration;
 
         arrcitiesStr = new String[] {"Москва", "Симферополь", "Париж"};
-        citiesListStr = new ArrayList<>();
         citiesListStr =  new ArrayList<> (Arrays.asList(arrcitiesStr));
 
         remFrFavBtn = findViewById(R.id.btnFromFav);
@@ -61,14 +62,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addToFavBtn.setOnClickListener(this);
         fab.setOnClickListener(this);
-       //remFrFavBtn.setOnClickListener(this);
+
         LinearLayoutManager llManager = new LinearLayoutManager(this);
         llManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         llManager.scrollToPosition(0);
         rvMain.setLayoutManager(llManager);
 
-        //TODO REGEXP на определение назвагния города из данных html страницы
         svMain.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
             @Override
             public boolean onQueryTextChange(String s) {
                 return false;
@@ -77,21 +78,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean onQueryTextSubmit(String s) {
                 try {
-                    doc = (Document) Helper.getRetFeedTask().execute(s, MainActivity.this, citiesListStr).get();
+                    doc = (Document) getRetFeedTask().execute(s, MainActivity.this, citiesListStr).get();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
                 addToFavBtn.setEnabled(true);
                 addToFavBtn.setVisibility(View.VISIBLE);
-                curCity = Helper.getCityFromDoc(doc);
-                Helper.updateMainUI(doc, MainActivity.this, citiesListStr);
+                curCity = getCityFromDoc(doc);
+                updateMainUI(doc, MainActivity.this, citiesListStr);
 
                 return false;
             }
         });
 
         try{
-           citiesList = Helper.getCities(citiesListStr, MainActivity.this);
+           citiesList = getCities(citiesListStr, MainActivity.this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,9 +107,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view){
-        Log.d("CLICKED", "HERE");
-        switch(view.getId()){
 
+        switch(view.getId()){
             case R.id.btnFromFav: {
                 int position = (Integer)view.getTag();
                 if(citiesListStr.get(position).equals(curCity)) {
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 citiesListStr.remove(position);
                 try {
-                    citiesList = Helper.getCities(citiesListStr, MainActivity.this);
+                    citiesList = getCities(citiesListStr, MainActivity.this);
                     adapter.updateData(citiesList);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -126,14 +126,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             break;
             case R.id.btnToFav: {
                 if(tvMainCity.getText() != getResources().getString(R.string.startLabel)) {
-                    //addToFavBtn.setImageDrawable(getDrawable(R.drawable.baseline_done_black_18dp));
                     addToFavBtn.startAnimation(animation);
                     addToFavBtn.setVisibility(View.INVISIBLE);
                     addToFavBtn.setEnabled(false);
                     citiesListStr.add(curCity);
                     try {
-                       //addToFavBtn.setImageDrawable(getDrawable(R.drawable.baseline_add_black_18dp));
-                        citiesList = Helper.getCities(citiesListStr, MainActivity.this);
+                        citiesList = getCities(citiesListStr, MainActivity.this);
                         adapter.updateData(citiesList);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -145,15 +143,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(tvMainCity.getText() != getResources().getString(R.string.startLabel)){
                    try{
-                     doc = (Document) Helper.getRetFeedTask().execute(curCity, MainActivity.this, citiesListStr).get();
+                     doc = (Document) getRetFeedTask().execute(curCity, MainActivity.this, citiesListStr).get();
                    } catch (Exception e){
                        e.printStackTrace();
                    }
-                   Helper.updateMainUI(doc, this, citiesListStr);
+                  updateMainUI(doc, this, citiesListStr);
                 }
 
                 try{
-                    citiesList = Helper.getCities(citiesListStr, MainActivity.this);
+                    citiesList = getCities(citiesListStr, MainActivity.this);
                     adapter.updateData(citiesList);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -181,8 +179,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         @NonNull
-        public ListItemViewHolder onCreateViewHolder(
-                @NonNull ViewGroup viewGroup, int viewType) {
+        public ListItemViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
             View itemView = LayoutInflater.
                     from(viewGroup.getContext()).
                     inflate(R.layout.layout_tv_city,
@@ -205,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return cities.size();
         }
 
-         class ListItemViewHolder extends RecyclerView.ViewHolder{
+        class ListItemViewHolder extends RecyclerView.ViewHolder{
             TextView name;
             TextView time;
             ImageButton remove;
@@ -217,9 +214,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 remove.setOnClickListener(MainActivity.this);
             }
         }
-
     }
-
-
-
 }
