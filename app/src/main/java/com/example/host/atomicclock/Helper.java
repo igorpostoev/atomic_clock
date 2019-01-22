@@ -2,50 +2,55 @@ package com.example.host.atomicclock;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+//Class for different independent actions
 class Helper {
-
+    //List for concurrent calculations, general space for threads
     private final static ArrayList<City> citiesGeneral = new ArrayList<>();
-    private final RetrieveFeedTask retFeedTask = new RetrieveFeedTask();
     private final static Helper helper = new Helper();
 
+    //methods for creating thread searching for single city
     static RetrieveFeedTask getRetFeedTask(){
         return helper.getFeedTask();
     }
 
     private RetrieveFeedTask getFeedTask(){
-        return retFeedTask;
+        return new RetrieveFeedTask();
     }
 
    static public class RetrieveFeedTask extends AsyncTask<Object, Document, Object> {
         private Document doc;
         private String city;
-        private ArrayList<?> citiesToCompare;
 
         final protected Object doInBackground(Object... objs) {
             String url;
-            Activity context;
-
-            citiesToCompare = (ArrayList<?>) objs[2];
-            context = (Activity) objs[1];
+            MainActivity context;
+            Connection.Response response = null;
+            context = (MainActivity) objs[1];
             city = (String)objs[0];
             url = context.getResources().getString(R.string.url);
 
-            Connection con = Jsoup.connect(url+city);
             try {
-                doc = con.get();
-                return doc;
+                try {
+                    response = Jsoup.connect(url + city).execute();
+                } catch (HttpStatusException e){
+                    Snackbar.make(context.tvMainCity, e.getMessage(), Snackbar.LENGTH_LONG).show();
+                }
+                return response;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -67,13 +72,17 @@ class Helper {
         return city.substring(0, city.length()-1);
     }
 
-    static void updateMainUI(Document doc, MainActivity context, ArrayList<String> city){
-        TextView tvC = context.findViewById(R.id.tvMainCity);
-        TextView tvT = context.findViewById(R.id.tvMainTime);
-        ImageButton addToFavBtn = context.findViewById(R.id.btnToFav);
+    //update TextViews on main Layout and add button
+    static void updateMainUI(Document doc, CityViewHolder cvh, ArrayList<String> city, String curCity){
+        TextView tvC = cvh.tvMainCity;
+        TextView tvT = cvh.tvMainTime;
+        ImageButton addToFavBtn = cvh.addToFavBtn;
+
+        addToFavBtn.setEnabled(true);
+        addToFavBtn.setVisibility(View.VISIBLE);
 
         for(String c : city){
-            if(context.curCity.equals(c)){
+            if(curCity.equals(c)){
                 addToFavBtn.setVisibility(View.INVISIBLE);
                 addToFavBtn.setEnabled(false);
                 break;
@@ -84,7 +93,7 @@ class Helper {
         tvC.setText(doc.select("div#msgdiv").text());
     }
 
-
+    // start concurrent threads referring to each city to find and return list of cities
     static ArrayList<City> getCities(ArrayList<String> listStr, Activity context){
 
         return helper.getAndUpdateCitiesGeneral(listStr, context);

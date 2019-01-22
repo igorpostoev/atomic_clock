@@ -2,6 +2,7 @@ package com.example.host.atomicclock;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -14,6 +15,8 @@ import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.TextView;
+
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import java.util.List;
 import java.util.ArrayList;
@@ -40,34 +43,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton remFrFavBtn;
     AlphaAnimation animation;
     Document doc;
+    Connection.Response res;
     String curCity;
-
+    CityViewHolder cvh;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RecyclerView.ItemDecoration itemDecoration;
-
+        //Initial list of cities, can be empty.
         arrcitiesStr = new String[] {"Москва", "Симферополь", "Париж"};
         citiesListStr =  new ArrayList<> (Arrays.asList(arrcitiesStr));
+        //Find view
+        cvh = new CityViewHolder(this);
 
-        remFrFavBtn = findViewById(R.id.btnFromFav);
-        addToFavBtn = findViewById(R.id.btnToFav);
-        tvMainTime = findViewById(R.id.tvMainTime);
-        tvMainCity = findViewById(R.id.tvMainCity);
-        svMain = findViewById(R.id.svMain);
-        fab = findViewById(R.id.fab);
-        rvMain = findViewById(R.id.rvMain);
+        remFrFavBtn = cvh.remFrFavBtn;
+        addToFavBtn = cvh.addToFavBtn;
+        tvMainTime = cvh. tvMainTime;
+        tvMainCity = cvh.tvMainCity;
+        svMain = cvh.svMain;
+        fab = cvh.fab;
+        rvMain = cvh.rvMain;
+
+        //Source url for time check
         urlsrc = getResources().getString(R.string.url);
 
         addToFavBtn.setOnClickListener(this);
         fab.setOnClickListener(this);
 
+        //Managing recycle view
         LinearLayoutManager llManager = new LinearLayoutManager(this);
         llManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         llManager.scrollToPosition(0);
         rvMain.setLayoutManager(llManager);
 
+        //Initial List initialisation
+        try{
+           citiesList = getCities(citiesListStr, MainActivity.this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //RV working
+        adapter = new RecyclerViewClockAdapter(citiesList);
+        rvMain.setAdapter(adapter);
+        itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL);
+        rvMain.addItemDecoration(itemDecoration);
+        animation = new AlphaAnimation(1.0f, 0.2f);
+        animation.setDuration(1000);
+
+        // Set listener for SearchView
         svMain.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
@@ -77,34 +102,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public boolean onQueryTextSubmit(String s) {
+                int status;
                 try {
-                    doc = (Document) getRetFeedTask().execute(s, MainActivity.this, citiesListStr).get();
+                    res = (Connection.Response) getRetFeedTask().execute(s, MainActivity.this).get();
+                    if(res!=null){
+                        doc = res.parse();
+                        curCity = getCityFromDoc(doc);
+                        updateMainUI(doc, cvh, citiesListStr, curCity);
+                    }
                 } catch (Exception e){
                     e.printStackTrace();
                 }
-                addToFavBtn.setEnabled(true);
-                addToFavBtn.setVisibility(View.VISIBLE);
-                curCity = getCityFromDoc(doc);
-                updateMainUI(doc, MainActivity.this, citiesListStr);
 
                 return false;
             }
         });
-
-        try{
-           citiesList = getCities(citiesListStr, MainActivity.this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        adapter = new RecyclerViewClockAdapter(citiesList);
-        rvMain.setAdapter(adapter);
-        itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL);
-        rvMain.addItemDecoration(itemDecoration);
-        animation = new AlphaAnimation(1.0f, 0.2f);
-        animation.setDuration(1000);
     }
 
+    //Method maintains listener body for different views
     @Override
     public void onClick(View view){
 
@@ -147,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                    } catch (Exception e){
                        e.printStackTrace();
                    }
-                  updateMainUI(doc, this, citiesListStr);
+                  updateMainUI(doc, cvh, citiesListStr, curCity);
                 }
 
                 try{
@@ -160,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    //complex class for handling recycle view
     public class RecyclerViewClockAdapter extends RecyclerView.Adapter<RecyclerViewClockAdapter.ListItemViewHolder>{
         private List<City> cities;
 
